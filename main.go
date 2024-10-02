@@ -28,6 +28,14 @@ func main() {
 	emhun.Run()
 
 	fmt.Println("\nFinished executing EMHUN algorithm.")
+	outputFileName := "output/results.txt"
+	err = writeResultsToFile(emhun, outputFileName)
+	if err != nil {
+		fmt.Println("Error writing results:", err)
+		return
+	}
+
+	fmt.Println("Finished executing EMHUN algorithm. Results written to", outputFileName)
 }
 
 func readTransactionsFromFile(fileName string) ([]*models.Transaction, error) {
@@ -82,4 +90,23 @@ func readTransactionsFromFile(fileName string) ([]*models.Transaction, error) {
 	}
 
 	return transactions, nil
+}
+func writeResultsToFile(emhun *algorithms.EMHUN, fileName string) error {
+	file, err := os.Create(fileName)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	writer := bufio.NewWriter(file)
+
+	for _, hui := range emhun.SearchAlgorithms.HighUtilityItemsets {
+		line := fmt.Sprintf("Itemset: %v, Utility: %d\n", hui.Itemset, hui.Utility)
+		_, err := writer.WriteString(line)
+		if err != nil {
+			return err
+		}
+	}
+
+	return writer.Flush()
 }

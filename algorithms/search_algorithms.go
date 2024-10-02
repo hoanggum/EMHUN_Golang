@@ -54,7 +54,7 @@ func (s *SearchAlgorithms) Search(eta []int, X map[int]bool, transactions []*mod
 		s.FilteredSecondary = []int{}
 		utility.CalculateRSUForAllItem(transactions, s.ItemList, secondary, s.UtilityArray)
 		utility.CalculateRLUForAllItem(transactions, s.ItemList, secondary, s.UtilityArray)
-
+		s.processSecondary(secondary, s.ItemList, transactions, minU)
 		for _, secItem := range secondary {
 			rsu := s.UtilityArray.GetRSU(secItem)
 			rlu := s.UtilityArray.GetRLU(secItem)
@@ -69,7 +69,7 @@ func (s *SearchAlgorithms) Search(eta []int, X map[int]bool, transactions []*mod
 
 		fmt.Printf("Primary%v = %v\n", s.ItemList, s.FilteredPrimary)
 		fmt.Printf("Secondary%v = %v\n", s.ItemList, s.FilteredSecondary)
-		s.processSecondary(s.FilteredSecondary, s.ItemList, transactions, minU)
+		// s.processSecondary(s.FilteredSecondary, s.ItemList, transactions, minU)
 		s.Search(eta, s.Beta, projectedDB, s.FilteredPrimary, s.FilteredSecondary, minU)
 	}
 }
@@ -84,8 +84,12 @@ func (s *SearchAlgorithms) processSecondary(secondary []int, beta []int, transac
 		fmt.Printf("Utility of combination %v: %d\n", betaNew, utilityBetaNew)
 
 		if utilityBetaNew >= minU {
-			fmt.Printf("U(%d) = %d >= %d HUI Found: %v\n", secItem, utilityBetaNew, minU, betaNew)
-			s.HighUtilityItemsets = append(s.HighUtilityItemsets, models.NewHighUtilityItemset(mapKeys(betaNew), utilityBetaNew))
+			if !containsItemset(s.HighUtilityItemsets, mapKeys(betaNew), utilityBetaNew) {
+				fmt.Printf("U(%d) = %d >= %d HUI Found: %v\n", secItem, utilityBetaNew, minU, betaNew)
+				s.HighUtilityItemsets = append(s.HighUtilityItemsets, models.NewHighUtilityItemset(mapKeys(betaNew), utilityBetaNew))
+			} else {
+				fmt.Printf("Duplicate HUI, skipping: %v\n", betaNew)
+			}
 		} else {
 			fmt.Printf("%d < %d so %d is not a HUI.\n", utilityBetaNew, minU, secItem)
 		}
@@ -99,8 +103,12 @@ func (s *SearchAlgorithms) processSecondary(secondary []int, beta []int, transac
 			fmt.Printf("Utility of extended combination %v: %d\n", betaExtended, utilityBetaExtended)
 
 			if utilityBetaExtended >= minU {
-				fmt.Printf("U(%d) = %d >= %d HUI Found: %v\n", nextSecItem, utilityBetaExtended, minU, betaExtended)
-				s.HighUtilityItemsets = append(s.HighUtilityItemsets, models.NewHighUtilityItemset(mapKeys(betaExtended), utilityBetaExtended))
+				if !containsItemset(s.HighUtilityItemsets, mapKeys(betaExtended), utilityBetaExtended) {
+					fmt.Printf("U(%d) = %d >= %d HUI Found: %v\n", nextSecItem, utilityBetaExtended, minU, betaExtended)
+					s.HighUtilityItemsets = append(s.HighUtilityItemsets, models.NewHighUtilityItemset(mapKeys(betaExtended), utilityBetaExtended))
+				} else {
+					fmt.Printf("Duplicate extended HUI, skipping: %v\n", betaExtended)
+				}
 			} else {
 				fmt.Printf("%d < %d so %d is not a HUI.\n", utilityBetaExtended, minU, nextSecItem)
 			}
@@ -177,6 +185,27 @@ func (s *SearchAlgorithms) projectDatabase(transactions []*models.Transaction, i
 	}
 
 	return projectedDB
+}
+func containsItemset(highUtilityItemsets []*models.HighUtilityItemset, newItemset []int, utility int) bool {
+	for _, hui := range highUtilityItemsets {
+		if compareItemsets(hui.Itemset, newItemset) && hui.Utility == utility {
+			return true
+		}
+	}
+	return false
+}
+
+// Helper function to compare two itemsets
+func compareItemsets(itemset1, itemset2 []int) bool {
+	if len(itemset1) != len(itemset2) {
+		return false
+	}
+	for i := range itemset1 {
+		if itemset1[i] != itemset2[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func (s *SearchAlgorithms) calculateUtility(transactions []*models.Transaction, itemset map[int]bool) int {
