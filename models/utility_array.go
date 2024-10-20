@@ -59,6 +59,7 @@ func (ua *UtilityArray) GetRSU(index int) int {
 }
 
 func (ua *UtilityArray) PrintUtilityArray() {
+
 	fmt.Println("RTWU Array:")
 	fmt.Println(ua.RTWUs)
 

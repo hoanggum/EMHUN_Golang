@@ -1,8 +1,8 @@
 Itemset: [4], Utility: 28
 Itemset: [4 3], Utility: 31
+Itemset: [4 3 5], Utility: 37
+Itemset: [4 3 5 2], Utility: 27
 Itemset: [4 5], Utility: 37
+Itemset: [5 2 4], Utility: 31
+Itemset: [6 5 2 4], Utility: 25
 Itemset: [4 2], Utility: 25
-Itemset: [3 5 4], Utility: 37
-Itemset: [4 5 2], Utility: 31
-Itemset: [3 4], Utility: 31
-Itemset: [3 4 5], Utility: 37

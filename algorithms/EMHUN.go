@@ -267,31 +267,6 @@ func (e *EMHUN) identifyPrimaryItems() {
 	fmt.Printf("Primary(X): %v\n", e.PrimaryItems)
 }
 
-func (e *EMHUN) intersectMaps(map1, map2 map[int]bool) map[int]bool {
-	intersection := make(map[int]bool)
-	for k := range map1 {
-		if map2[k] {
-			intersection[k] = true
-		}
-	}
-	return intersection
-}
-func (e *EMHUN) intersectKeys(items map[int]bool, sets ...map[int]bool) []int {
-	var result []int
-	for item := range items {
-		isInAll := true
-		for _, set := range sets {
-			if !set[item] {
-				isInAll = false
-				break
-			}
-		}
-		if isInAll {
-			result = append(result, item)
-		}
-	}
-	return result
-}
 func (e *EMHUN) getTypeOrder(item int) int {
 	if e.Rho[item] {
 		return 1

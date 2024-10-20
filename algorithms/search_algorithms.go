@@ -27,11 +27,14 @@ func (s *SearchAlgorithms) Search(eta []int, X map[int]bool, transactions []*mod
 	if len(primary) == 0 {
 		return
 	}
-
+	fmt.Printf("len {%d} \n", len(primary))
 	for _, item := range primary {
+		fmt.Printf("item: %v\n", item)
+
 		s.Beta = copyMap(X)
 		s.Beta[item] = true
 		s.ItemList = mapKeys(s.Beta)
+		fmt.Printf("beta: %v\n", s.Beta)
 
 		utilityBeta := s.calculateUtility(transactions, s.Beta)
 		fmt.Printf("Utility of %v: %d\n", s.Beta, utilityBeta)
@@ -48,71 +51,40 @@ func (s *SearchAlgorithms) Search(eta []int, X map[int]bool, transactions []*mod
 
 		if utilityBeta > minU {
 			s.SearchN(eta, s.Beta, transactions, minU)
+
 		}
 
 		s.FilteredPrimary = []int{}
 		s.FilteredSecondary = []int{}
 		utility.CalculateRSUForAllItem(transactions, s.ItemList, secondary, s.UtilityArray)
 		utility.CalculateRLUForAllItem(transactions, s.ItemList, secondary, s.UtilityArray)
-		s.processSecondary(secondary, s.ItemList, transactions, minU)
-		for _, secItem := range secondary {
-			rsu := s.UtilityArray.GetRSU(secItem)
-			rlu := s.UtilityArray.GetRLU(secItem)
-
-			if rsu >= minU {
-				s.FilteredPrimary = append(s.FilteredPrimary, secItem)
+		for i, secItem := range secondary {
+			// Bỏ qua các item trước vị trí của item hiện tại
+			if secItem == item {
+				continue
 			}
-			if rlu >= minU {
-				s.FilteredSecondary = append(s.FilteredSecondary, secItem)
+
+			// Chỉ xét các item nằm sau item hiện tại
+			if i > indexOf(secondary, item) {
+				rsu := s.UtilityArray.GetRSU(secItem)
+				rlu := s.UtilityArray.GetRLU(secItem)
+
+				if rsu >= minU {
+					s.FilteredPrimary = append(s.FilteredPrimary, secItem)
+				}
+				if rlu >= minU {
+					s.FilteredSecondary = append(s.FilteredSecondary, secItem)
+				}
 			}
 		}
-
+		fmt.Printf("Eta = %v\n", eta)
+		fmt.Printf("Beta= %v\n", s.Beta)
 		fmt.Printf("Primary%v = %v\n", s.ItemList, s.FilteredPrimary)
 		fmt.Printf("Secondary%v = %v\n", s.ItemList, s.FilteredSecondary)
+		fmt.Printf("Minu = %v\n", minU)
+
 		// s.processSecondary(s.FilteredSecondary, s.ItemList, transactions, minU)
-		s.Search(eta, s.Beta, projectedDB, s.FilteredPrimary, s.FilteredSecondary, minU)
-	}
-}
-
-func (s *SearchAlgorithms) processSecondary(secondary []int, beta []int, transactions []*models.Transaction, minU int) {
-	for i := 0; i < len(secondary); i++ {
-		secItem := secondary[i]
-		betaNew := copyMapFromList(beta)
-		betaNew[secItem] = true
-
-		utilityBetaNew := s.calculateUtility(transactions, betaNew)
-		fmt.Printf("Utility of combination %v: %d\n", betaNew, utilityBetaNew)
-
-		if utilityBetaNew >= minU {
-			if !containsItemset(s.HighUtilityItemsets, mapKeys(betaNew), utilityBetaNew) {
-				fmt.Printf("U(%d) = %d >= %d HUI Found: %v\n", secItem, utilityBetaNew, minU, betaNew)
-				s.HighUtilityItemsets = append(s.HighUtilityItemsets, models.NewHighUtilityItemset(mapKeys(betaNew), utilityBetaNew))
-			} else {
-				fmt.Printf("Duplicate HUI, skipping: %v\n", betaNew)
-			}
-		} else {
-			fmt.Printf("%d < %d so %d is not a HUI.\n", utilityBetaNew, minU, secItem)
-		}
-
-		for j := i + 1; j < len(secondary); j++ {
-			nextSecItem := secondary[j]
-			betaExtended := copyMap(betaNew)
-			betaExtended[nextSecItem] = true
-
-			utilityBetaExtended := s.calculateUtility(transactions, betaExtended)
-			fmt.Printf("Utility of extended combination %v: %d\n", betaExtended, utilityBetaExtended)
-
-			if utilityBetaExtended >= minU {
-				if !containsItemset(s.HighUtilityItemsets, mapKeys(betaExtended), utilityBetaExtended) {
-					fmt.Printf("U(%d) = %d >= %d HUI Found: %v\n", nextSecItem, utilityBetaExtended, minU, betaExtended)
-					s.HighUtilityItemsets = append(s.HighUtilityItemsets, models.NewHighUtilityItemset(mapKeys(betaExtended), utilityBetaExtended))
-				} else {
-					fmt.Printf("Duplicate extended HUI, skipping: %v\n", betaExtended)
-				}
-			} else {
-				fmt.Printf("%d < %d so %d is not a HUI.\n", utilityBetaExtended, minU, nextSecItem)
-			}
-		}
+		s.Search(eta, s.Beta, transactions, s.FilteredPrimary, s.FilteredSecondary, minU)
 	}
 }
 
@@ -147,9 +119,9 @@ func (s *SearchAlgorithms) SearchN(eta []int, beta map[int]bool, transactions []
 				filteredPrimary = append(filteredPrimary, secItem)
 			}
 		}
+		fmt.Printf("Primary = %v\n", filteredPrimary)
 
-		remainingEta := removeItem(eta, item)
-		s.SearchN(remainingEta, betaNew, transactions, minU)
+		s.SearchN(filteredPrimary, betaNew, transactions, minU)
 	}
 }
 
@@ -186,42 +158,26 @@ func (s *SearchAlgorithms) projectDatabase(transactions []*models.Transaction, i
 
 	return projectedDB
 }
-func containsItemset(highUtilityItemsets []*models.HighUtilityItemset, newItemset []int, utility int) bool {
-	for _, hui := range highUtilityItemsets {
-		if compareItemsets(hui.Itemset, newItemset) && hui.Utility == utility {
-			return true
-		}
-	}
-	return false
-}
-
-// Helper function to compare two itemsets
-func compareItemsets(itemset1, itemset2 []int) bool {
-	if len(itemset1) != len(itemset2) {
-		return false
-	}
-	for i := range itemset1 {
-		if itemset1[i] != itemset2[i] {
-			return false
-		}
-	}
-	return true
-}
 
 func (s *SearchAlgorithms) calculateUtility(transactions []*models.Transaction, itemset map[int]bool) int {
 	totalUtility := 0
+
 	for _, transaction := range transactions {
+		// Kiểm tra nếu transaction chứa tất cả các phần tử trong itemset
 		if containsAllItemsMap(transaction.Items, itemset) {
-			itemsetUtility := 0
+			// Tính tổng utility cho tất cả các phần tử trong itemset
 			for item := range itemset {
 				index := indexOf(transaction.Items, item)
 				if index != -1 {
-					itemsetUtility += transaction.Utilities[index]
+					itemUtility := transaction.Utilities[index]
+					fmt.Printf("Utility của item %d trong transaction %v: %d\n", item, transaction.Items, itemUtility)
+					totalUtility += itemUtility
 				}
 			}
-			totalUtility += itemsetUtility
 		}
 	}
+
+	fmt.Printf("Tổng utility của itemset %v: %d\n", mapKeys(itemset), totalUtility)
 	return totalUtility
 }
 
@@ -260,16 +216,6 @@ func indexOf(items []int, item int) int {
 	return -1
 }
 
-func removeItem(slice []int, item int) []int {
-	result := []int{}
-	for _, v := range slice {
-		if v != item {
-			result = append(result, v)
-		}
-	}
-	return result
-}
-
 func containsAllItemsMap(items []int, itemset map[int]bool) bool {
 	for item := range itemset {
 		if indexOf(items, item) == -1 {
@@ -277,13 +223,6 @@ func containsAllItemsMap(items []int, itemset map[int]bool) bool {
 		}
 	}
 	return true
-}
-func copyMapFromList(list []int) map[int]bool {
-	copy := make(map[int]bool)
-	for _, v := range list {
-		copy[v] = true
-	}
-	return copy
 }
 func (s *SearchAlgorithms) printProjectedDatabase(projectedDB []*models.Transaction, item int) {
 	fmt.Printf("\nProjected Database after item %d:\n", item)
