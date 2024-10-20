@@ -27,26 +27,27 @@ func (s *SearchAlgorithms) Search(eta []int, X map[int]bool, transactions []*mod
 	if len(primary) == 0 {
 		return
 	}
-	fmt.Printf("len {%d} \n", len(primary))
+	// fmt.Printf("len {%d} \n", len(primary))
 	for _, item := range primary {
-		fmt.Printf("item: %v\n", item)
+		// fmt.Printf("item: %v\n", item)
 
 		s.Beta = copyMap(X)
 		s.Beta[item] = true
 		s.ItemList = mapKeys(s.Beta)
-		fmt.Printf("beta: %v\n", s.Beta)
+		// fmt.Printf("beta: %v\n", s.Beta)
 
 		utilityBeta := s.calculateUtility(transactions, s.Beta)
-		fmt.Printf("Utility of %v: %d\n", s.Beta, utilityBeta)
+		// fmt.Printf("Utility of %v: %d\n", s.Beta, utilityBeta)
 
-		projectedDB := s.projectDatabase(transactions, s.ItemList)
-		s.printProjectedDatabase(projectedDB, item)
+		// projectedDB := s.projectDatabase(transactions, s.ItemList)
+		// s.printProjectedDatabase(projectedDB, item)projectedDB := s.projectDatabase(transactions, s.ItemList)
+		// s.printProjectedDatabase(projectedDB, item)
 
 		if utilityBeta >= minU {
-			fmt.Printf("U(%d) = %d >= %d HUI Found: %v\n", item, utilityBeta, minU, s.Beta)
+			// fmt.Printf("U(%d) = %d >= %d HUI Found: %v\n", item, utilityBeta, minU, s.Beta)
 			s.HighUtilityItemsets = append(s.HighUtilityItemsets, models.NewHighUtilityItemset(s.ItemList, utilityBeta))
 		} else {
-			fmt.Printf("%d < %d so %d is not a HUI.\n", utilityBeta, minU, item)
+			// fmt.Printf("%d < %d so %d is not a HUI.\n", utilityBeta, minU, item)
 		}
 
 		if utilityBeta > minU {
@@ -77,11 +78,11 @@ func (s *SearchAlgorithms) Search(eta []int, X map[int]bool, transactions []*mod
 				}
 			}
 		}
-		fmt.Printf("Eta = %v\n", eta)
-		fmt.Printf("Beta= %v\n", s.Beta)
-		fmt.Printf("Primary%v = %v\n", s.ItemList, s.FilteredPrimary)
-		fmt.Printf("Secondary%v = %v\n", s.ItemList, s.FilteredSecondary)
-		fmt.Printf("Minu = %v\n", minU)
+		// fmt.Printf("Eta = %v\n", eta)
+		// fmt.Printf("Beta= %v\n", s.Beta)
+		// fmt.Printf("Primary%v = %v\n", s.ItemList, s.FilteredPrimary)
+		// fmt.Printf("Secondary%v = %v\n", s.ItemList, s.FilteredSecondary)
+		// fmt.Printf("Minu = %v\n", minU)
 
 		// s.processSecondary(s.FilteredSecondary, s.ItemList, transactions, minU)
 		s.Search(eta, s.Beta, transactions, s.FilteredPrimary, s.FilteredSecondary, minU)
@@ -98,17 +99,17 @@ func (s *SearchAlgorithms) SearchN(eta []int, beta map[int]bool, transactions []
 		betaNew[item] = true
 
 		itemList := mapKeys(betaNew)
-		projectedDB := s.projectDatabase(transactions, itemList)
-		s.printProjectedDatabase(projectedDB, item)
+		// projectedDB := s.projectDatabase(transactions, itemList)
+		// s.printProjectedDatabase(projectedDB, item)
 
 		utilityBetaNew := s.calculateUtility(transactions, betaNew)
-		fmt.Printf("Utility of (negative) %v: %d\n", betaNew, utilityBetaNew)
+		// fmt.Printf("Utility of (negative) %v: %d\n", betaNew, utilityBetaNew)
 
 		if utilityBetaNew >= minU {
-			fmt.Printf("U(%d) = %d >= %d HUI Found: %v\n", item, utilityBetaNew, minU, betaNew)
+			// fmt.Printf("U(%d) = %d >= %d HUI Found: %v\n", item, utilityBetaNew, minU, betaNew)
 			s.HighUtilityItemsets = append(s.HighUtilityItemsets, models.NewHighUtilityItemset(mapKeys(betaNew), utilityBetaNew))
 		} else {
-			fmt.Printf("%d < %d so %v is not a HUI.\n", utilityBetaNew, minU, betaNew)
+			// fmt.Printf("%d < %d so %v is not a HUI.\n", utilityBetaNew, minU, betaNew)
 		}
 
 		filteredPrimary := []int{}
@@ -119,7 +120,7 @@ func (s *SearchAlgorithms) SearchN(eta []int, beta map[int]bool, transactions []
 				filteredPrimary = append(filteredPrimary, secItem)
 			}
 		}
-		fmt.Printf("Primary = %v\n", filteredPrimary)
+		// fmt.Printf("Primary = %v\n", filteredPrimary)
 
 		s.SearchN(filteredPrimary, betaNew, transactions, minU)
 	}
@@ -170,14 +171,14 @@ func (s *SearchAlgorithms) calculateUtility(transactions []*models.Transaction, 
 				index := indexOf(transaction.Items, item)
 				if index != -1 {
 					itemUtility := transaction.Utilities[index]
-					fmt.Printf("Utility của item %d trong transaction %v: %d\n", item, transaction.Items, itemUtility)
+					// fmt.Printf("Utility của item %d trong transaction %v: %d\n", item, transaction.Items, itemUtility)
 					totalUtility += itemUtility
 				}
 			}
 		}
 	}
 
-	fmt.Printf("Tổng utility của itemset %v: %d\n", mapKeys(itemset), totalUtility)
+	// fmt.Printf("Tổng utility của itemset %v: %d\n", mapKeys(itemset), totalUtility)
 	return totalUtility
 }
 

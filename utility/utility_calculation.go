@@ -104,7 +104,7 @@ func CalculateRTWUForAllItems(transactions []*models.Transaction, rho, delta, et
 		utilityArray.SetRTWU(item, totalRTWU)
 		// fmt.Printf("Calculated total RTWU for item %d: %d\n", item, totalRTWU)
 	}
-	utilityArray.PrintUtilityArray()
+	// utilityArray.PrintUtilityArray()
 }
 func CalculateRTUForTransaction(transaction *models.Transaction) int {
 	rtwu := 0
@@ -152,7 +152,7 @@ func CalculateRemainingUtility(transaction *models.Transaction, startIndex int) 
 func CalculateRSUForAllItem(transactions []*models.Transaction, X []int, secondary []int, utilityArray *models.UtilityArray) {
 	for _, item := range secondary {
 		totalRSU := 0
-		fmt.Printf("\nCalculating RSU for item: %d\n", item)
+		// fmt.Printf("\nCalculating RSU for item: %d\n", item)
 
 		for _, transaction := range transactions {
 			if ContainsAllItems(transaction, X) && ContainsItem(transaction, item) {
@@ -162,19 +162,19 @@ func CalculateRSUForAllItem(transactions []*models.Transaction, X []int, seconda
 				rru := CalculateRemainingUtility(transaction, indexZ+1)
 				totalRSU += utilityX + utilityZ + rru
 
-				fmt.Printf("  Found set X %v and item %d in transaction %v with utility of X: %d, utility of z: %d, Remaining Residual Utility: %d, Calculated RSU: %d\n",
-					X, item, transaction.Items, utilityX, utilityZ, rru, utilityX+utilityZ+rru)
+				// fmt.Printf("  Found set X %v and item %d in transaction %v with utility of X: %d, utility of z: %d, Remaining Residual Utility: %d, Calculated RSU: %d\n",
+				// 	X, item, transaction.Items, utilityX, utilityZ, rru, utilityX+utilityZ+rru)
 			}
 		}
 
 		utilityArray.SetRSU(item, totalRSU)
-		fmt.Printf("Calculated total RSU for item %d: %d\n", item, totalRSU)
+		// fmt.Printf("Calculated total RSU for item %d: %d\n", item, totalRSU)
 	}
 }
 func CalculateRLUForAllItem(transactions []*models.Transaction, X []int, secondary []int, utilityArray *models.UtilityArray) {
 	for _, item := range secondary {
 		totalRLU := 0
-		fmt.Printf("\nCalculating RLU for item: %d\n", item)
+		// fmt.Printf("\nCalculating RLU for item: %d\n", item)
 
 		for _, transaction := range transactions {
 			if ContainsAllItems(transaction, X) && ContainsItem(transaction, item) {
@@ -186,13 +186,13 @@ func CalculateRLUForAllItem(transactions []*models.Transaction, X []int, seconda
 
 				totalRLU += utilityX + remainingUtility
 
-				fmt.Printf("  Found item %d in transaction %v with utility of X: %d, Remaining Residual Utility (RRU): %d, Calculated RLU: %d\n",
-					item, transaction.Items, utilityX, remainingUtility, utilityX+remainingUtility)
+				// fmt.Printf("  Found item %d in transaction %v with utility of X: %d, Remaining Residual Utility (RRU): %d, Calculated RLU: %d\n",
+				// 	item, transaction.Items, utilityX, remainingUtility, utilityX+remainingUtility)
 			}
 		}
 
 		utilityArray.SetRLU(item, totalRLU)
-		fmt.Printf("Calculated total RLU for item %d: %d\n", item, totalRLU)
+		// fmt.Printf("Calculated total RLU for item %d: %d\n", item, totalRLU)
 	}
 }
 

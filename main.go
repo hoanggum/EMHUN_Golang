@@ -28,7 +28,7 @@ func main() {
 	emhun.Run()
 
 	fmt.Println("\nFinished executing EMHUN algorithm.")
-	outputFileName := "output/results.txt"
+	outputFileName := "output/results1.txt"
 	err = writeResultsToFile(emhun, outputFileName)
 	if err != nil {
 		fmt.Println("Error writing results:", err)

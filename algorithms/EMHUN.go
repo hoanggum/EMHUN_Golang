@@ -66,9 +66,9 @@ func (e *EMHUN) Run() {
 	// fmt.Println("\nSorting transactions by total RTWU:")
 	e.SortTransactionsByTWU() // Gọi hàm sắp xếp giao dịch theo RTWU
 
-	fmt.Println("\nTransactions after sorting by RTWU:")
-	e.PrintTransactions()
-	fmt.Println("\nCalculating RSU for each item in Secondary(X)...")
+	// fmt.Println("\nTransactions after sorting by RTWU:")
+	// e.PrintTransactions()
+	// fmt.Println("\nCalculating RSU for each item in Secondary(X)...")
 	utility.CalculateRSUForAllItems(e.Transactions, e.SortedSecondary, e.UtilityArray)
 
 	e.identifyPrimaryItems()
@@ -168,8 +168,9 @@ func (e *EMHUN) sortItems(items []int) []int {
 
 func (e *EMHUN) FilterTransactions(secondaryItems map[int]bool, etaItems map[int]bool) {
 	// fmt.Println("\nBắt đầu lọc các giao dịch: Chỉ giữ lại các item trong Secondary(X) ∪ η.")
+	// for idx, transaction := range e.Transactions {
 
-	for idx, transaction := range e.Transactions {
+	for _, transaction := range e.Transactions {
 		// In ra giao dịch ban đầu
 		// fmt.Printf("Giao dịch ban đầu %d: Items: %v, Utilities: %v\n", idx+1, transaction.Items, transaction.Utilities)
 
@@ -189,15 +190,16 @@ func (e *EMHUN) FilterTransactions(secondaryItems map[int]bool, etaItems map[int
 		transaction.Utilities = filteredUtilities
 
 		// In ra giao dịch sau khi đã lọc
-		fmt.Printf("Giao dịch sau khi lọc %d: Items: %v, Utilities: %v\n", idx+1, transaction.Items, transaction.Utilities)
+		// fmt.Printf("Giao dịch sau khi lọc %d: Items: %v, Utilities: %v\n", idx+1, transaction.Items, transaction.Utilities)
 	}
 }
 
 func (e *EMHUN) SortItemsInTransactions() {
-	fmt.Println("\nBắt đầu sắp xếp các item trong từng giao dịch theo các nhóm ρ, δ, η...")
+	// fmt.Println("\nBắt đầu sắp xếp các item trong từng giao dịch theo các nhóm ρ, δ, η...")
+	// for idx, transaction := range e.Transactions {
 
-	for idx, transaction := range e.Transactions {
-		fmt.Printf("Trước khi sắp xếp (Giao dịch %d): Items: %v, Utilities: %v\n", idx+1, transaction.Items, transaction.Utilities)
+	for _, transaction := range e.Transactions {
+		// fmt.Printf("Trước khi sắp xếp (Giao dịch %d): Items: %v, Utilities: %v\n", idx+1, transaction.Items, transaction.Utilities)
 
 		itemUtilityMap := make(map[int]int)
 		for i, item := range transaction.Items {
@@ -232,7 +234,7 @@ func (e *EMHUN) SortItemsInTransactions() {
 		transaction.Items = sortedItems
 		transaction.Utilities = sortedUtilities
 
-		fmt.Printf("Sau khi sắp xếp (Giao dịch %d): Items: %v, Utilities: %v\n", idx+1, transaction.Items, transaction.Utilities)
+		// fmt.Printf("Sau khi sắp xếp (Giao dịch %d): Items: %v, Utilities: %v\n", idx+1, transaction.Items, transaction.Utilities)
 	}
 }
 
@@ -264,7 +266,7 @@ func (e *EMHUN) identifyPrimaryItems() {
 			e.PrimaryItems = append(e.PrimaryItems, item)
 		}
 	}
-	fmt.Printf("Primary(X): %v\n", e.PrimaryItems)
+	// fmt.Printf("Primary(X): %v\n", e.PrimaryItems)
 }
 
 func (e *EMHUN) getTypeOrder(item int) int {
