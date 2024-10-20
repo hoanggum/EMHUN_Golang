@@ -90,19 +90,19 @@ func CalculateRTWUForAllItems(transactions []*models.Transaction, rho, delta, et
 
 	for item := range combinedSet {
 		totalRTWU := 0
-		fmt.Printf("\nCalculating RTWU for item: %d\n", item)
+		// fmt.Printf("\nCalculating RTWU for item: %d\n", item)
 
 		for _, transaction := range transactions {
 			if ContainsItem(transaction, item) {
-				fmt.Printf("  Found item %d in transaction: %v\n", item, transaction.Items)
+				// fmt.Printf("  Found item %d in transaction: %v\n", item, transaction.Items)
 				rtwu := CalculateRTUForTransaction(transaction)
 				totalRTWU += rtwu
-				fmt.Printf(" = %d (cumulative RTWU: %d)\n", rtwu, totalRTWU)
+				// fmt.Printf(" = %d (cumulative RTWU: %d)\n", rtwu, totalRTWU)
 			}
 		}
 
 		utilityArray.SetRTWU(item, totalRTWU)
-		fmt.Printf("Calculated total RTWU for item %d: %d\n", item, totalRTWU)
+		// fmt.Printf("Calculated total RTWU for item %d: %d\n", item, totalRTWU)
 	}
 	utilityArray.PrintUtilityArray()
 }
@@ -118,7 +118,7 @@ func CalculateRTUForTransaction(transaction *models.Transaction) int {
 func CalculateRSUForAllItems(transactions []*models.Transaction, secondary []int, utilityArray *models.UtilityArray) {
 	for _, item := range secondary {
 		totalRSU := 0
-		fmt.Printf("\nCalculating RSU for item: %d\n", item)
+		// fmt.Printf("\nCalculating RSU for item: %d\n", item)
 
 		for _, transaction := range transactions {
 			if ContainsItem(transaction, item) {
@@ -127,13 +127,13 @@ func CalculateRSUForAllItems(transactions []*models.Transaction, secondary []int
 				remainingUtility := CalculateRemainingUtility(transaction, index+1)
 				totalRSU += itemUtility + remainingUtility
 
-				fmt.Printf("  Found item %d in transaction %v with utility: %d, Remaining Residual Utility: %d\n",
-					item, transaction.Items, itemUtility, remainingUtility)
+				// fmt.Printf("  Found item %d in transaction %v with utility: %d, Remaining Residual Utility: %d\n",
+				// 	item, transaction.Items, itemUtility, remainingUtility)
 			}
 		}
 
 		utilityArray.SetRSU(item, totalRSU)
-		fmt.Printf("Calculated total RSU for item %d: %d\n", item, totalRSU)
+		// fmt.Printf("Calculated total RSU for item %d: %d\n", item, totalRSU)
 	}
 }
 
