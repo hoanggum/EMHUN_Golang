@@ -1,8 +1,0 @@
-Itemset: [4], Utility: 28
-Itemset: [4 3], Utility: 31
-Itemset: [3 5 4], Utility: 37
-Itemset: [3 5 4 2], Utility: 27
-Itemset: [5 4], Utility: 37
-Itemset: [4 5 2], Utility: 31
-Itemset: [6 4 5 2], Utility: 25
-Itemset: [4 2], Utility: 25

@@ -6,11 +6,11 @@ import (
 )
 
 type HighUtilityItemset struct {
-	Itemset []int
-	Utility int
+	Itemset []int      
+	Utility float64    
 }
 
-func NewHighUtilityItemset(itemset []int, utility int) *HighUtilityItemset {
+func NewHighUtilityItemset(itemset []int, utility float64) *HighUtilityItemset {
 	return &HighUtilityItemset{
 		Itemset: itemset,
 		Utility: utility,
@@ -21,10 +21,10 @@ func (hui *HighUtilityItemset) GetItemset() []int {
 	return hui.Itemset
 }
 
-func (hui *HighUtilityItemset) GetUtility() int {
+func (hui *HighUtilityItemset) GetUtility() float64 {
 	return hui.Utility
 }
 
 func (hui *HighUtilityItemset) String() string {
-	return fmt.Sprintf("Itemset: [%s], Utility: %d", strings.Trim(fmt.Sprint(hui.Itemset), "[]"), hui.Utility)
+	return fmt.Sprintf("Itemset: [%s], Utility: %.2f", strings.Trim(fmt.Sprint(hui.Itemset), "[]"), hui.Utility)
 }

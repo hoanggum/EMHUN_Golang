@@ -9,7 +9,7 @@ import (
 
 type EMHUN struct {
 	Transactions     []*models.Transaction
-	MinUtility       int
+	MinUtility       float64
 	Rho, Delta, Eta  map[int]bool
 	SortedSecondary  []int
 	SortedEta        []int
@@ -18,7 +18,7 @@ type EMHUN struct {
 	SearchAlgorithms *SearchAlgorithms
 }
 
-func NewEMHUN(transactions []*models.Transaction, minUtility int) *EMHUN {
+func NewEMHUN(transactions []*models.Transaction, minUtility float64) *EMHUN {
 	utilityArray := models.NewUtilityArray(len(transactions))
 	return &EMHUN{
 		Transactions:     transactions,
@@ -35,9 +35,6 @@ func (e *EMHUN) Run() {
 
 	fmt.Println("Running EMHUN...")
 
-	// fmt.Println("\nCalculating Transaction Utility for each transaction:")
-	// utility.CalculateAndPrintAllTransactionUtilities(e.Transactions)
-
 	e.ClassifyItems()
 
 	fmt.Println("\nAfter classify, we have:")
@@ -49,23 +46,17 @@ func (e *EMHUN) Run() {
 	combinedSet := e.unionKeys(e.Rho, e.Delta)
 	secondaryItems := e.getSecondaryItems(combinedSet, e.UtilityArray, e.MinUtility)
 
-	// fmt.Printf("\nFinal set of Secondary items: %v\n", secondaryItems)
-
 	e.SortedSecondary = e.sortItems(secondaryItems)
-	// fmt.Printf("Sorted Secondary(X): %v\n", e.SortedSecondary)
-
 	e.SortedEta = e.sortItems(e.keys(e.Eta))
-	// fmt.Printf("Sorted η: %v\n", e.SortedEta)
+
 	secondaryItemsMap := convertSliceToMap(e.SortedSecondary)
 	e.FilterTransactions(secondaryItemsMap, e.Eta)
-	// e.PrintTransactions()
 
 	e.SortItemsInTransactions()
 	// e.PrintTransactions()
 
 	// fmt.Println("\nSorting transactions by total RTWU:")
-	e.SortTransactionsByTWU() // Gọi hàm sắp xếp giao dịch theo RTWU
-
+	e.SortTransactionsByTWU()
 	// fmt.Println("\nTransactions after sorting by RTWU:")
 	// e.PrintTransactions()
 	// fmt.Println("\nCalculating RSU for each item in Secondary(X)...")
@@ -78,18 +69,18 @@ func (e *EMHUN) Run() {
 	// In kết quả sau khi tìm High Utility Itemsets
 	fmt.Println("\nHUIs Found:")
 	for _, hui := range e.SearchAlgorithms.HighUtilityItemsets {
-		fmt.Printf("Itemset: %v, Utility: %d\n", hui.Itemset, hui.Utility)
+		fmt.Printf("Itemset: %v, Utility: %.2f\n", hui.Itemset, hui.Utility)
 	}
-	// Call methods to process transactions, calculate RTWU, RLU, RSU, etc.
 }
+
 func (e *EMHUN) PrintTransactions() {
 	fmt.Println("---------------------<Transaction>-------------------------")
 	for i, transaction := range e.Transactions {
 		fmt.Printf("Transaction %d: %s\n", i+1, transaction)
 	}
 	fmt.Println("-----------------------------------------------------------")
-
 }
+
 func (e *EMHUN) ClassifyItems() {
 	hasPositive := make(map[int]bool)
 	hasNegative := make(map[int]bool)
@@ -121,8 +112,8 @@ func (e *EMHUN) ClassifyItems() {
 		}
 	}
 }
-func (e *EMHUN) printClassification() {
 
+func (e *EMHUN) printClassification() {
 	rhoItems := e.keys(e.Rho)
 	deltaItems := e.keys(e.Delta)
 	etaItems := e.keys(e.Eta)
@@ -136,7 +127,7 @@ func (e *EMHUN) printClassification() {
 	// fmt.Println("Items with negative utility only (η):", etaItems)
 }
 
-func (e *EMHUN) getSecondaryItems(combinedSet map[int]bool, utilityArray *models.UtilityArray, minU int) []int {
+func (e *EMHUN) getSecondaryItems(combinedSet map[int]bool, utilityArray *models.UtilityArray, minU float64) []int {
 	var secondary []int
 	for item := range combinedSet {
 		rlu := utilityArray.GetRTWU(item)
@@ -148,6 +139,7 @@ func (e *EMHUN) getSecondaryItems(combinedSet map[int]bool, utilityArray *models
 	fmt.Printf("Secondary(X) items: %v\n", secondary)
 	return secondary
 }
+
 func (e *EMHUN) sortItems(items []int) []int {
 	sort.Slice(items, func(i, j int) bool {
 		typeOrderI := e.getTypeOrder(items[i])
@@ -169,39 +161,29 @@ func (e *EMHUN) sortItems(items []int) []int {
 func (e *EMHUN) FilterTransactions(secondaryItems map[int]bool, etaItems map[int]bool) {
 	// fmt.Println("\nBắt đầu lọc các giao dịch: Chỉ giữ lại các item trong Secondary(X) ∪ η.")
 	// for idx, transaction := range e.Transactions {
-
 	for _, transaction := range e.Transactions {
-		// In ra giao dịch ban đầu
 		// fmt.Printf("Giao dịch ban đầu %d: Items: %v, Utilities: %v\n", idx+1, transaction.Items, transaction.Utilities)
 
 		var filteredItems []int
-		var filteredUtilities []int
+		var filteredUtilities []float64 // Sửa từ int thành float64
 
 		for i, item := range transaction.Items {
-			// Check if the item is in Secondary(X) or η
 			if secondaryItems[item] || etaItems[item] {
 				filteredItems = append(filteredItems, item)
 				filteredUtilities = append(filteredUtilities, transaction.Utilities[i])
 			}
 		}
 
-		// Update the transaction with the filtered items and utilities
 		transaction.Items = filteredItems
 		transaction.Utilities = filteredUtilities
-
-		// In ra giao dịch sau khi đã lọc
 		// fmt.Printf("Giao dịch sau khi lọc %d: Items: %v, Utilities: %v\n", idx+1, transaction.Items, transaction.Utilities)
+
 	}
 }
 
 func (e *EMHUN) SortItemsInTransactions() {
-	// fmt.Println("\nBắt đầu sắp xếp các item trong từng giao dịch theo các nhóm ρ, δ, η...")
-	// for idx, transaction := range e.Transactions {
-
 	for _, transaction := range e.Transactions {
-		// fmt.Printf("Trước khi sắp xếp (Giao dịch %d): Items: %v, Utilities: %v\n", idx+1, transaction.Items, transaction.Utilities)
-
-		itemUtilityMap := make(map[int]int)
+		itemUtilityMap := make(map[int]float64) // Sửa giá trị map từ int thành float64
 		for i, item := range transaction.Items {
 			itemUtilityMap[item] = transaction.Utilities[i]
 		}
@@ -226,22 +208,19 @@ func (e *EMHUN) SortItemsInTransactions() {
 
 		sortedItems := append(append(positiveItems, hybridItems...), negativeItems...)
 
-		var sortedUtilities []int
+		var sortedUtilities []float64 // Sửa từ int thành float64
 		for _, item := range sortedItems {
 			sortedUtilities = append(sortedUtilities, itemUtilityMap[item])
 		}
 
 		transaction.Items = sortedItems
 		transaction.Utilities = sortedUtilities
-
-		// fmt.Printf("Sau khi sắp xếp (Giao dịch %d): Items: %v, Utilities: %v\n", idx+1, transaction.Items, transaction.Utilities)
 	}
 }
 
 func (e *EMHUN) SortTransactionsByTWU() {
 	fmt.Println("\nSorting transactions by total RLU of items...")
 
-	// Sắp xếp các giao dịch dựa trên tổng RLU
 	sort.Slice(e.Transactions, func(i, j int) bool {
 		tuI := utility.CalculateTransactionUtility(e.Transactions[i])
 		tuJ := utility.CalculateTransactionUtility(e.Transactions[j])
@@ -249,24 +228,21 @@ func (e *EMHUN) SortTransactionsByTWU() {
 		// Sắp xếp tăng dần theo tổng RLU
 		return tuI < tuJ
 	})
-
-	// In ra các giao dịch sau khi sắp xếp
-	// fmt.Println("\nAfter sorting transactions by total RLU:")
-	// e.PrintTransactions()
 }
+
 func (e *EMHUN) sortItemsByRTWU(items []int) []int {
 	sort.Slice(items, func(i, j int) bool {
 		return e.UtilityArray.GetRTWU(items[i]) < e.UtilityArray.GetRTWU(items[j])
 	})
 	return items
 }
+
 func (e *EMHUN) identifyPrimaryItems() {
 	for _, item := range e.SortedSecondary {
 		if e.UtilityArray.GetRSU(item) >= e.MinUtility {
 			e.PrimaryItems = append(e.PrimaryItems, item)
 		}
 	}
-	// fmt.Printf("Primary(X): %v\n", e.PrimaryItems)
 }
 
 func (e *EMHUN) getTypeOrder(item int) int {
@@ -303,6 +279,7 @@ func (e *EMHUN) keys(m map[int]bool) []int {
 	}
 	return keys
 }
+
 func convertSliceToMap(slice []int) map[int]bool {
 	result := make(map[int]bool)
 	for _, item := range slice {

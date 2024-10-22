@@ -11,8 +11,8 @@ import (
 )
 
 func main() {
-	fileName := "data/table3.txt"
-	minUtility := 25
+	fileName := "data/liquor_dynamic.txt"
+	minUtility := 400000.0
 
 	transactions, err := readTransactionsFromFile(fileName)
 	if err != nil {
@@ -28,7 +28,7 @@ func main() {
 	emhun.Run()
 
 	fmt.Println("\nFinished executing EMHUN algorithm.")
-	outputFileName := "output/results1.txt"
+	outputFileName := "output/liquor_dynamic.txt"
 	err = writeResultsToFile(emhun, outputFileName)
 	if err != nil {
 		fmt.Println("Error writing results:", err)
@@ -66,21 +66,22 @@ func readTransactionsFromFile(fileName string) ([]*models.Transaction, error) {
 			items = append(items, itemInt)
 		}
 
-		transUtility, err := strconv.Atoi(strings.TrimSpace(parts[1]))
+		transUtility, err := strconv.ParseFloat(strings.TrimSpace(parts[1]), 64)
 		if err != nil {
 			return nil, err
 		}
 
 		utilitiesStr := strings.Fields(parts[2])
-		var utilities []int
+		var utilities []float64
 		for _, utility := range utilitiesStr {
-			utilityInt, err := strconv.Atoi(utility)
+			utilityFloat, err := strconv.ParseFloat(utility, 64)
 			if err != nil {
 				return nil, err
 			}
-			utilities = append(utilities, utilityInt)
+			utilities = append(utilities, utilityFloat)
 		}
 
+		// Tạo transaction với các số thực
 		transaction := models.NewTransaction(items, utilities, transUtility)
 		transactions = append(transactions, transaction)
 	}
@@ -101,7 +102,7 @@ func writeResultsToFile(emhun *algorithms.EMHUN, fileName string) error {
 	writer := bufio.NewWriter(file)
 
 	for _, hui := range emhun.SearchAlgorithms.HighUtilityItemsets {
-		line := fmt.Sprintf("Itemset: %v, Utility: %d\n", hui.Itemset, hui.Utility)
+		line := fmt.Sprintf("Itemset: %v, Utility: %.2f\n", hui.Itemset, hui.Utility)
 		_, err := writer.WriteString(line)
 		if err != nil {
 			return err

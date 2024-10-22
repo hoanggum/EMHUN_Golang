@@ -1,0 +1,8 @@
+Itemset: [4], Utility: %!d(float64=28)
+Itemset: [4 3], Utility: %!d(float64=31)
+Itemset: [4 3 5], Utility: %!d(float64=37)
+Itemset: [4 3 5 2], Utility: %!d(float64=27)
+Itemset: [4 5], Utility: %!d(float64=37)
+Itemset: [4 5 2], Utility: %!d(float64=31)
+Itemset: [4 5 2 6], Utility: %!d(float64=25)
+Itemset: [4 2], Utility: %!d(float64=25)
