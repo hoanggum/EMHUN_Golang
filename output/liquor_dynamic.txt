@@ -1,0 +1,7 @@
+Itemset: [3224], Utility: 690.00
+Itemset: [3224 5326], Utility: 628.50
+Itemset: [3224 44419], Utility: 669.48
+Itemset: [3224 69637], Utility: 624.00
+Itemset: [3224 21596], Utility: 665.40
+Itemset: [64867 3224], Utility: 621.96
+Itemset: [45248 3224], Utility: 666.00

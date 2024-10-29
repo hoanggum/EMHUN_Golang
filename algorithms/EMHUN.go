@@ -63,6 +63,7 @@ func (e *EMHUN) Run() {
 	utility.CalculateRSUForAllItems(e.Transactions, e.SortedSecondary, e.UtilityArray)
 
 	e.identifyPrimaryItems()
+	fmt.Println("Primary: %d", e.PrimaryItems)
 	fmt.Println("\nStarting HUI Search...")
 	e.SearchAlgorithms.Search(e.SortedEta, make(map[int]bool), e.Transactions, e.PrimaryItems, e.SortedSecondary, e.MinUtility)
 
