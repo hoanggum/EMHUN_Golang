@@ -34,7 +34,7 @@ func (s *SearchAlgorithms) Search(eta []int, X map[int]bool, transactions []*mod
 		s.Beta[item] = true
 		s.ItemList = mapKeys(s.Beta)
 
-		utilityBeta := s.calculateUtility(transactions, s.Beta)
+		projectedDB, utilityBeta := s.projectDatabase(transactions, s.ItemList)
 
 		if utilityBeta >= minU {
 			fmt.Printf("U(%d) = %.2f >= %.2f HUI Found: %v\n", item, utilityBeta, minU, s.Beta)
@@ -44,13 +44,13 @@ func (s *SearchAlgorithms) Search(eta []int, X map[int]bool, transactions []*mod
 		}
 
 		if utilityBeta > minU {
-			s.SearchN(eta, s.Beta, transactions, minU)
+			s.SearchN(eta, s.Beta, projectedDB, minU)
 		}
 
 		s.FilteredPrimary = []int{}
 		s.FilteredSecondary = []int{}
-		utility.CalculateRSUForAllItem(transactions, s.ItemList, secondary, s.UtilityArray)
-		utility.CalculateRLUForAllItem(transactions, s.ItemList, secondary, s.UtilityArray)
+		utility.CalculateRSUForAllItem(projectedDB, s.ItemList, secondary, s.UtilityArray)
+		utility.CalculateRLUForAllItem(projectedDB, s.ItemList, secondary, s.UtilityArray)
 		for i, secItem := range secondary {
 
 			if secItem == item {
@@ -74,7 +74,7 @@ func (s *SearchAlgorithms) Search(eta []int, X map[int]bool, transactions []*mod
 		fmt.Printf("Primary%v = %v\n", s.ItemList, s.FilteredPrimary)
 		fmt.Printf("Secondary%v = %v\n", s.ItemList, s.FilteredSecondary)
 
-		s.Search(eta, s.Beta, transactions, s.FilteredPrimary, s.FilteredSecondary, minU)
+		s.Search(eta, s.Beta, projectedDB, s.FilteredPrimary, s.FilteredSecondary, minU)
 	}
 }
 
@@ -89,7 +89,7 @@ func (s *SearchAlgorithms) SearchN(eta []int, beta map[int]bool, transactions []
 
 		itemList := mapKeys(betaNew)
 
-		utilityBetaNew := s.calculateUtility(transactions, betaNew)
+		projectedDBNew, utilityBetaNew := s.projectDatabase(transactions, itemList)
 
 		if utilityBetaNew >= minU {
 			fmt.Printf("U(%d) = %.2f >= %.2f HUI Found: %v\n", item, utilityBetaNew, minU, betaNew)
@@ -100,7 +100,7 @@ func (s *SearchAlgorithms) SearchN(eta []int, beta map[int]bool, transactions []
 
 		itemIndex := indexOf(eta, item)
 		filteredPrimary := []int{}
-		utility.CalculateRSUForAllItem(transactions, itemList, eta, s.UtilityArray)
+		utility.CalculateRSUForAllItem(projectedDBNew, itemList, eta, s.UtilityArray)
 		for _, secItem := range eta {
 			if secItem == item {
 				continue
@@ -113,17 +113,47 @@ func (s *SearchAlgorithms) SearchN(eta []int, beta map[int]bool, transactions []
 			}
 		}
 		fmt.Printf("Primary = %v\n", filteredPrimary)
-		s.SearchN(filteredPrimary, betaNew, transactions, minU)
+		s.SearchN(filteredPrimary, betaNew, projectedDBNew, minU)
 	}
 }
 
-func (s *SearchAlgorithms) projectDatabase(transactions []*models.Transaction, items []int) []*models.Transaction {
+// func (s *SearchAlgorithms) projectDatabase(transactions []*models.Transaction, items []int) []*models.Transaction {
+// 	var projectedDB []*models.Transaction
+
+// 	for _, transaction := range transactions {
+// 		if containsAllItems(transaction.Items, items) {
+// 			var projectedItems []int
+// 			var projectedUtilities []float64
+// 			lastItemIndex := -1
+
+// 			for _, item := range items {
+// 				itemIndex := indexOf(transaction.Items, item)
+// 				if itemIndex > lastItemIndex {
+// 					lastItemIndex = itemIndex
+// 				}
+// 			}
+
+// 			for i := lastItemIndex + 1; i < len(transaction.Items); i++ {
+// 				projectedItems = append(projectedItems, transaction.Items[i])
+// 				projectedUtilities = append(projectedUtilities, transaction.Utilities[i])
+// 			}
+
+// 			if len(projectedItems) > 0 {
+// 				projectedDB = append(projectedDB, models.NewTransaction(projectedItems, projectedUtilities, calculateTransactionUtility(projectedUtilities)))
+// 			}
+// 		}
+// 	}
+
+//		return projectedDB
+//	}
+func (s *SearchAlgorithms) projectDatabase(transactions []*models.Transaction, items []int) ([]*models.Transaction, float64) {
 	var projectedDB []*models.Transaction
+	totalUtility := 0.0
 
 	for _, transaction := range transactions {
 		if containsAllItems(transaction.Items, items) {
 			var projectedItems []int
-			var projectedUtilities []float64 // Chuyển sang float64
+			var projectedUtilities []float64
 			lastItemIndex := -1
 
 			for _, item := range items {
@@ -133,18 +163,25 @@ func (s *SearchAlgorithms) projectDatabase(transactions []*models.Transaction, i
 				}
 			}
 
-			for i := lastItemIndex + 1; i < len(transaction.Items); i++ {
+			for i := 0; i < len(transaction.Items); i++ {
 				projectedItems = append(projectedItems, transaction.Items[i])
 				projectedUtilities = append(projectedUtilities, transaction.Utilities[i])
 			}
 
 			if len(projectedItems) > 0 {
-				projectedDB = append(projectedDB, models.NewTransaction(projectedItems, projectedUtilities, calculateTransactionUtility(projectedUtilities)))
+				transactionUtility := calculateTransactionUtility(projectedUtilities)
+				projectedDB = append(projectedDB, models.NewTransaction(projectedItems, projectedUtilities, transactionUtility))
+
+				for _, item := range items {
+					index := indexOf(transaction.Items, item)
+					if index != -1 {
+						totalUtility += transaction.Utilities[index]
+					}
+				}
 			}
 		}
 	}
-
-	return projectedDB
+	return projectedDB, totalUtility
 }
 
 func (s *SearchAlgorithms) calculateUtility(transactions []*models.Transaction, itemset map[int]bool) float64 {
@@ -208,11 +245,11 @@ func containsAllItemsMap(items []int, itemset map[int]bool) bool {
 	return true
 }
 
-func (s *SearchAlgorithms) printProjectedDatabase(projectedDB []*models.Transaction, item int) {
-	fmt.Printf("\nProjected Database after item %d:\n", item)
+func (s *SearchAlgorithms) printProjectedDatabase(projectedDB []*models.Transaction, items []int) {
+	fmt.Printf("\nProjected Database after items %v:\n", items)
 	for _, transaction := range projectedDB {
 		fmt.Printf("Items: %v, Utilities: %v, Transaction Utility: %.2f\n",
-			transaction.Items, transaction.Utilities, calculateTransactionUtility(transaction.Utilities)) // Sửa %d thành %.2f
+			transaction.Items, transaction.Utilities, calculateTransactionUtility(transaction.Utilities))
 	}
 	fmt.Println("----------------------------------")
 }

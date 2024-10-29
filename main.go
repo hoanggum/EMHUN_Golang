@@ -11,8 +11,8 @@ import (
 )
 
 func main() {
-	fileName := "data/liquor_dynamic.txt"
-	minUtility := 400000.0
+	fileName := "data/table3.txt"
+	minUtility := 25.0
 
 	transactions, err := readTransactionsFromFile(fileName)
 	if err != nil {
@@ -28,7 +28,7 @@ func main() {
 	emhun.Run()
 
 	fmt.Println("\nFinished executing EMHUN algorithm.")
-	outputFileName := "output/liquor_dynamic.txt"
+	outputFileName := "output/rstb3.txt"
 	err = writeResultsToFile(emhun, outputFileName)
 	if err != nil {
 		fmt.Println("Error writing results:", err)
