@@ -6,13 +6,22 @@ import (
 	"emhun/models"
 	"fmt"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
 	fileName := "data/table3.txt"
 	minUtility := 25.0
+
+	// Đo thời gian bắt đầu
+	startTime := time.Now()
+
+	// Đo bộ nhớ trước khi chạy thuật toán
+	var memStatsBefore, memStatsAfter runtime.MemStats
+	runtime.ReadMemStats(&memStatsBefore)
 
 	transactions, err := readTransactionsFromFile(fileName)
 	if err != nil {
@@ -27,9 +36,17 @@ func main() {
 
 	emhun.Run()
 
+	elapsedTime := time.Since(startTime).Seconds()
+	fmt.Printf("\nThời gian chạy thuật toán: %.6f s\n", elapsedTime)
+
+	// Đo bộ nhớ sau khi chạy thuật toán
+	runtime.ReadMemStats(&memStatsAfter)
+	allocatedMemory := (memStatsAfter.Alloc - memStatsBefore.Alloc) / 1024
+	fmt.Printf("Bộ nhớ sử dụng: %d KB\n", allocatedMemory)
+
 	fmt.Println("\nFinished executing EMHUN algorithm.")
-	outputFileName := "output/rstb3.txt"
-	err = writeResultsToFile(emhun, outputFileName)
+	outputFileName := "output/table3.txt"
+	err = writeResultsToFile(emhun, outputFileName, elapsedTime, allocatedMemory)
 	if err != nil {
 		fmt.Println("Error writing results:", err)
 		return
@@ -92,7 +109,7 @@ func readTransactionsFromFile(fileName string) ([]*models.Transaction, error) {
 
 	return transactions, nil
 }
-func writeResultsToFile(emhun *algorithms.EMHUN, fileName string) error {
+func writeResultsToFile(emhun *algorithms.EMHUN, fileName string, elapsedTime float64, allocatedMemory uint64) error {
 	file, err := os.Create(fileName)
 	if err != nil {
 		return err
@@ -101,12 +118,24 @@ func writeResultsToFile(emhun *algorithms.EMHUN, fileName string) error {
 
 	writer := bufio.NewWriter(file)
 
+	// Ghi kết quả thuật toán
 	for _, hui := range emhun.SearchAlgorithms.HighUtilityItemsets {
 		line := fmt.Sprintf("Itemset: %v, Utility: %.2f\n", hui.Itemset, hui.Utility)
 		_, err := writer.WriteString(line)
 		if err != nil {
 			return err
 		}
+	}
+
+	// Ghi thông tin về thời gian (theo giây) và bộ nhớ
+	_, err = writer.WriteString(fmt.Sprintf("\nThời gian chạy thuật toán: %.6f giây\n", elapsedTime))
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.WriteString(fmt.Sprintf("Bộ nhớ sử dụng: %d KB\n", allocatedMemory))
+	if err != nil {
+		return err
 	}
 
 	return writer.Flush()

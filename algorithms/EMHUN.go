@@ -19,7 +19,7 @@ type EMHUN struct {
 }
 
 func NewEMHUN(transactions []*models.Transaction, minUtility float64) *EMHUN {
-	utilityArray := models.NewUtilityArray(len(transactions))
+	utilityArray := models.NewUtilityArray()
 	return &EMHUN{
 		Transactions:     transactions,
 		MinUtility:       minUtility,
@@ -61,9 +61,8 @@ func (e *EMHUN) Run() {
 	// e.PrintTransactions()
 	// fmt.Println("\nCalculating RSU for each item in Secondary(X)...")
 	utility.CalculateRSUForAllItems(e.Transactions, e.SortedSecondary, e.UtilityArray)
-
 	e.identifyPrimaryItems()
-	fmt.Println("Primary: %d", e.PrimaryItems)
+	fmt.Println("Primary:", e.PrimaryItems)
 	fmt.Println("\nStarting HUI Search...")
 	e.SearchAlgorithms.Search(e.SortedEta, make(map[int]bool), e.Transactions, e.PrimaryItems, e.SortedSecondary, e.MinUtility)
 
