@@ -51,6 +51,8 @@ func (s *SearchAlgorithms) Search(eta []int, X map[int]bool, transactions []*mod
 		s.FilteredSecondary = []int{}
 		utility.CalculateRSUForAllItem(projectedDB, s.ItemList, secondary, s.UtilityArray)
 		utility.CalculateRLUForAllItem(projectedDB, s.ItemList, secondary, s.UtilityArray)
+		s.UtilityArray.PrintUtilityArray()
+
 		for i, secItem := range secondary {
 
 			if secItem == item {
@@ -60,6 +62,7 @@ func (s *SearchAlgorithms) Search(eta []int, X map[int]bool, transactions []*mod
 			if i > indexOf(secondary, item) {
 				rsu := s.UtilityArray.GetRSU(secItem)
 				rlu := s.UtilityArray.GetRLU(secItem)
+				fmt.Printf("RSU(%d): %.2f, RLU(%d): %.2f\n", secItem, rsu, secItem, rlu) // In giá trị RSU và RLU
 
 				if rsu >= minU {
 					s.FilteredPrimary = append(s.FilteredPrimary, secItem)
@@ -112,6 +115,7 @@ func (s *SearchAlgorithms) SearchN(eta []int, beta map[int]bool, transactions []
 				}
 			}
 		}
+		s.UtilityArray.PrintUtilityArray()
 		fmt.Printf("Primary = %v\n", filteredPrimary)
 		s.SearchN(filteredPrimary, betaNew, projectedDBNew, minU)
 	}

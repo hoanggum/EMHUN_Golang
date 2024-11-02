@@ -318,5 +318,5 @@ Itemset: [880], Utility: 39113.00
 Itemset: [884], Utility: 31518.00
 Itemset: [1380], Utility: 46121.00
 
-Thời gian chạy thuật toán: 24.940549 giây
-Bộ nhớ sử dụng: 16338 KB
+Thời gian chạy thuật toán: 25.329232 giây
+Bộ nhớ sử dụng: 14248 KB
