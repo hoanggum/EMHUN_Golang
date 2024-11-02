@@ -45,7 +45,7 @@ func main() {
 	fmt.Printf("Bộ nhớ sử dụng: %d KB\n", allocatedMemory)
 
 	fmt.Println("\nFinished executing EMHUN algorithm.")
-	outputFileName := "output/table3.txt"
+	outputFileName := "output/rstb3.txt"
 	err = writeResultsToFile(emhun, outputFileName, elapsedTime, allocatedMemory)
 	if err != nil {
 		fmt.Println("Error writing results:", err)
