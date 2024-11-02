@@ -170,7 +170,7 @@ func CalculateRLUForAllItem(transactions []*models.Transaction, X []int, seconda
 				maxIndexX := FindLocationMaxIndexForSet(transaction, X)
 				index := GetItemIndex(transaction, maxIndexX)
 
-				remainingUtility := CalculateRemainingUtility(transaction, index+1)
+				remainingUtility := CalculateRemainingUtility(transaction, index+2)
 
 				totalRLU += utilityX + remainingUtility
 			}
