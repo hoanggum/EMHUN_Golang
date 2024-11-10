@@ -13,8 +13,8 @@ import (
 )
 
 func main() {
-	fileName := "data/foodmart_dynamic.txt"
-	minUtility := 5000.0
+	fileName := "data/liquor_dynamic.txt"
+	minUtility := 50000.0
 
 	// Đo thời gian bắt đầu
 	startTime := time.Now()
@@ -45,7 +45,7 @@ func main() {
 	fmt.Printf("Bộ nhớ sử dụng: %d KB\n", allocatedMemory)
 
 	fmt.Println("\nFinished executing EMHUN algorithm.")
-	outputFileName := "output/foodmart_dynamic1.txt"
+	outputFileName := "output/liquor_dynamic50000.txt"
 	err = writeResultsToFile(emhun, outputFileName, elapsedTime, allocatedMemory)
 	if err != nil {
 		fmt.Println("Error writing results:", err)
