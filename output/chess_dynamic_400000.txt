@@ -1,0 +1,3 @@
+
+Thời gian chạy thuật toán: 7.184128 giây
+Bộ nhớ sử dụng: 7940 KB
