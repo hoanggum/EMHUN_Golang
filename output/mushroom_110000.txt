@@ -69373,4 +69373,4 @@ Itemset: [86], Utility: 175760.00
 Itemset: [86 34], Utility: 131862.00
 
 Thời gian chạy thuật toán: 855.297372 giây
-Bộ nhớ sử dụng: 28601 KB
+Bộ nhớ sử dụng: 34601 KB
